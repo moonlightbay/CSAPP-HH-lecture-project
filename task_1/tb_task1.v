@@ -43,11 +43,25 @@ module processor_tb;
 
 
         #40; // Wait for a few cycles
+        wEn = 1;
         // Write first instruction (IRMOV $8, %r5) -> 10_f5_00_08
-        addr = 0; wDat = 32'h10f50008; wEn = 1; #20;
-        // Write second instruction (SUB %r4, %r5) -> 22_45_00_00
-        addr = 1; wDat = 32'h22450000; wEn = 1; #20;
+        addr = 0; wDat = 32'h10f50008;  #20;
+        // Write second instruction (SUB %r4, %r5) -> 21_45_00_00
+        addr = 1; wDat = 32'h21450000; #20;
         // Write third instruction (ADD %r1, %r2) -> 20_12_00_00
-        addr = 2; wDat = 32'h20120000; wEn = 1; #20;
+        addr = 2; wDat = 32'h20120000; #20;
 
-        
+        // stop writing
+        wEn = 0; #20;
+        working = 1;  // 使处理器开始工作
+        addr = 0;  // 重置地址用于取指
+        #60;
+        working = 0;  // 使处理器停止工作
+    end
+
+// 监视输出
+    initial begin
+        $monitor("Time: %t | icode: %h, ifun: %h, rA: %h, rB: %h, valC: %h", $time, icode, ifun, rA, rB, valC);
+    end
+
+endmodule

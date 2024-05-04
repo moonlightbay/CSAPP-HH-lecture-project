@@ -13,26 +13,31 @@
 条 32 位的指令，并解析指令，最终输出；当 working 无效时，并且在写使能信号
 wEn 有效时， 通过 addr 和 wDat 向指令存储器中写入数据。*/
 module processor(
-input clock,
-input [8:0] addr,
-input wEn,
-input [31:0] wDat,         
-input working,    
-output [3:0] icode,        // Instruction code
-output [3:0] ifun,         // function code
-output [3:0] rA,           
-output [3:0] rB,
-output [15:0] valC
+input wire clock,
+input wire[8:0] addr,      //外部提供的地址
+input wire wEn,
+input wire[31:0] wDat,    //wDat is for writting data to ram         
+input wire working,    
+output reg[3:0] icode = 0,        // Instruction code
+output reg[3:0] ifun = 0,         // function code
+output reg[3:0] rA = 0,           
+output reg[3:0] rB = 0,
+output reg[15:0] valC = 0
 );
 
 wire [31:0] instr;         // Instruction
-reg wEn_for_ram = 0;       // Write enable for RAM
+wire [8:0] ram_addr;       // RAM address
+wire ram_wEn;              // RAM write enable
+reg [15:0] pc = 0;         // Program counter
+
+assign ram_wEn = wEn & ~working;  //当working有效时，不允许写入ram
+assign ram_addr = ram_wEn ? addr : pc;  //当ram_wEn有效时，地址为addr，否则为pc
 
 //实例化RAM
 ram inst_ram(
     .clock(clock),            //clock信号
-    .addr(addr),     
-    .wEn(wEn_for_ram),       //ram的写使能信号
+    .addr(ram_addr),     
+    .wEn(ram_wEn),       //ram的写使能信号
     .wDat(wDat),             //写入ram的数据
     .rEn(working),           //读使能信号
     .rDat(instr)             //读取来自ram的数据
@@ -46,9 +51,8 @@ always@(posedge clock)begin
         rA <= instr[23:20];
         rB <= instr[19:16];
         valC <= instr[15:0];
-        pc <= pc + 4;
+        pc <= pc + 1;   //更新PC
     end
-    wEn_for_ram <= wEn && !working;  //当working无效时，且wEn有效时，ram的写使能信号有效
 end
 
 
