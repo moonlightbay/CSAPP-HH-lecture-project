@@ -45,7 +45,7 @@ ram inst_ram(
 
 
 always@(posedge clock)begin 
-    if(working)begin   //取指令
+    if (working && instr != 32'h0) begin   //取指令
         icode <= instr[31:28];
         ifun <= instr[27:24];
         rA <= instr[23:20];
@@ -54,6 +54,5 @@ always@(posedge clock)begin
         pc <= pc + 1;   //更新PC
     end
 end
-
 
 endmodule

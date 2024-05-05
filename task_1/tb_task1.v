@@ -55,7 +55,7 @@ module processor_tb;
         wEn = 0; #20;
         working = 1;  // 使处理器开始工作
         addr = 0;  // 重置地址用于取指
-        #60;
+        #100;
         working = 0;  // 使处理器停止工作
     end
 
