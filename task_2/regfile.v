@@ -34,7 +34,7 @@ always @(posedge clock) begin
             4'b0011: r3 <= valE;
             4'b0100: r4 <= valE;
             4'b0101: r5 <= valE;
-            default: // do nothing
+            default: ;// do nothing
         endcase;
 
         case(dstM)
@@ -44,7 +44,7 @@ always @(posedge clock) begin
             4'b0011: r3 <= valM;
             4'b0100: r4 <= valM;
             4'b0101: r5 <= valM;
-            default: // do nothing
+            default: ;// do nothing
         endcase;      
     end
 end

@@ -32,15 +32,23 @@ module processor(
 );
     /*PC*/
     reg [15:0] pc = 0;         // Program counter
+
     /*指令*/
     wire [31:0] instr;         // Instruction
-    reg [3:0] icode, ifun, rA, rB;     // Instruction code, function code, rA, rB
-    reg[15:0] valC = 0;         //立即数
+    // reg [3:0] icode, ifun, rA, rB;     // Instruction code, function code, rA, rB
+    // reg[15:0] valC = 0;         //立即数
+    // icode <= instr[31:28];
+    // ifun <= instr[27:24];
+    // rA <= instr[23:20];
+    // rB <= instr[19:16];
+    // valC <= instr[15:0];
+    
     /*RAM*/
     wire [8:0] ram_addr;       // RAM address
     wire ram_wEn;              // RAM write enable
     assign ram_wEn = wEn & ~working;  //当working有效时，不允许写入ram
     assign ram_addr = ram_wEn ? addr : pc;  //当ram_wEn有效时，地址为addr，否则为pc
+    
     /*寄存器文件*/
     reg[3:0] dstE, dstM;      //目的寄存器
     reg[31:0] valE, valM;     //写入寄存器的数据
@@ -71,19 +79,13 @@ module processor(
         .r5(r5)
     );
 
-    always@(posedge clock)begin 
+    always @(posedge clock) begin
         if (working && instr != 32'h0) begin   //取指令
-            icode <= instr[31:28];
-            ifun <= instr[27:24];
-            rA <= instr[23:20];
-            rB <= instr[19:16];
-            valC <= instr[15:0];
+            if (instr[31:28] == 4'b0001 && instr[27:24] == 4'b0000) begin
+                dstM <= instr[19:16];      //rB
+                valM <= instr[15:0];       //valC
+            end
             pc <= pc + 1;   //更新PC
-        end
-
-        if (icode == 4'b0001 && ifun == 4'b0000) begin  //IRMOV
-            dstM <= rB;
-            valM <= valC;
         end
     end
 endmodule
