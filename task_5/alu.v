@@ -13,7 +13,7 @@ always@(*)begin
     case(alufun)
         4'b0000: valE = aluA + aluB;  //加法
         4'b0001: valE = aluA - aluB;  //减法
-        4'b0010: valE = aluA & aluB;  //与运�?
+        4'b0010: valE = aluA & aluB;  //与运算
         4'b0011: valE = aluA ^ aluB;  //异或运算
         default: valE = 32'h0;
     endcase
