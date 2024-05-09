@@ -36,7 +36,7 @@ module processor(
     reg[31:0] valM;     //写入寄存器的数据
     reg[3:0] srcA, srcB;      //源寄存器
     wire[31:0] valA, valB;      //寄存器文件输出的数据
-    reg[3:0] dstE_delayed;    //用于将dstE延后两个周期，以匹配时序
+    reg[3:0] dstE_delayed;    //用于将dstE延后一个周期，以匹配时序
     
 
     /*ALU*/

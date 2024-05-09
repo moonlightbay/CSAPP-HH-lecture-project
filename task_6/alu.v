@@ -4,19 +4,15 @@
 
 module alu(
 input [31:0] aluA,
-input [31:0] aluB,
+input [31:0] aluB,  //在LW与SW中也作为基地址
 input [3:0] alufun,
-output reg[31:0] valE
+output [31:0] valE
 );
 
-always@(*)begin
-    case(alufun)
-        4'b0000: valE = aluA + aluB;  //加法
-        4'b0001: valE = aluA - aluB;  //减法
-        4'b0010: valE = aluA & aluB;  //与运算
-        4'b0011: valE = aluA ^ aluB;  //异或运算
-        default: valE = 32'h0;
-    endcase
-end
+assign valE = (alufun == 4'b0000) ? aluA + aluB :  //ADD,LW,SW
+              (alufun == 4'b0001) ? aluA - aluB :  //SUB
+              (alufun == 4'b0010) ? aluA & aluB :  //AND
+              (alufun == 4'b0011) ? aluA ^ aluB :  //XOR
+              32'bz;
 
 endmodule
