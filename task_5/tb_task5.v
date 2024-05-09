@@ -41,17 +41,17 @@ initial begin
     wDat = 0;
     wEn = 1;
     // (IRMOV $28, %r0) -> 10_00_00_1c
-    addr = 0; wDat = 32'h1000001c;  #20;
+    addr = 0; wDat = 32'h10f0001c;  #20;
     // (IRMOV $29, %r1) -> 10_01_00_1d
-    addr = 1; wDat = 32'h1001001d; #20;
+    addr = 1; wDat = 32'h10f1001d; #20;
     // (IRMOV $30, %r2) -> 10_02_00_1e
-    addr = 2; wDat = 32'h1002001e; #20;
+    addr = 2; wDat = 32'h10f2001e; #20;
     // (IRMOV $31, %r3) -> 10_03_00_1f
-    addr = 3; wDat = 32'h1003001f; #20;
+    addr = 3; wDat = 32'h10f3001f; #20;
     // (IRMOV $32, %r4) -> 10_04_00_20
-    addr = 4; wDat = 32'h10040020; #20;
+    addr = 4; wDat = 32'h10f40020; #20;
     // (IRMOV $33, %r5) -> 10_05_00_21
-    addr = 5; wDat = 32'h10050021; #20;
+    addr = 5; wDat = 32'h10f50021; #20;
     // (ADD %r0, %r1) -> 20_01_00_00
     addr = 6; wDat = 32'h20010000; #20;
     // (SUB %r2, %r3) -> 21_23_00_00
