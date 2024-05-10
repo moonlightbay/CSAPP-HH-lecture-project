@@ -102,7 +102,7 @@ module processor(
 
     //解析指令 第2个上升沿
      always @(posedge clock) begin
-        if (working && instr != 32'h0) begin   //取指+解析
+        if (working && instr != 32'h0 && ~LW && ~SW) begin   //取指+解析，如果LW/SW正处于执行阶段，则不解析
             if (instr[31:28] == 4'b0001 && instr[27:24] == 4'b0000) begin   //IRMOV, rB -> valC
                 dstM <= instr[19:16];      //rB
                 valM <= instr[15:0];       //valC
@@ -169,6 +169,10 @@ module processor(
             end
             pc <= pc + 1;   //更新PC
         end
+        else if (working && (LW | SW)) begin  //LW/SW执行阶段,不解析,但是将LW和SW,等结束后取指
+            SW_delayed<= 1'b0;
+            LW_delayed<= 1'b0;
+        end
     end
 
     always @(posedge clock) begin
@@ -176,6 +180,7 @@ module processor(
         dstE <= dstE_delayed;      //将rA保存1个周期，用于写回
         SW <= SW_delayed;          //将SW保存1个周期，用于alu&lsu
         LW <= LW_delayed;          //将LW保存1个周期，用于alu&lsu
+        valC <= valC_delayed;      //将valC保存1个周期，用于alu
     end
 
 endmodule
