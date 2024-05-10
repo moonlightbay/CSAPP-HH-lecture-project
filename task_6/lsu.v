@@ -48,13 +48,14 @@ ram inst_ram(
 );    //ram_rdata will be updated in the next clock cycle
 
 /* MUX for instr and data */
-assign instr = working ? ram_rdata : 32'b0; 
+reg[31:0] instr_reg;
+assign instr = ~LW_DONE ? ram_rdata : instr_reg; 
 assign valM = working ? ram_rdata : 32'b0;   
 
 always @(posedge clock) begin
     if (reset) begin
         dstM_reg <= 0;
-    end
+        end
     else begin
         if (LW) begin
             dstM_reg <= dstE; 
@@ -62,6 +63,10 @@ always @(posedge clock) begin
         end
         else begin
             LW_DONE <= 0;
+        end
+
+        if (LW && !LW_DONE) begin
+            instr_reg <= ram_rdata;
         end
     end
 end

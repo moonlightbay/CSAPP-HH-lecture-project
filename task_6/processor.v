@@ -31,19 +31,19 @@ module processor(
     wire [31:0] wdata_lsu;     //data to be written to ram 
     reg SW = 1'b0, SW_delayed = 1'b0;                   // SW signal for lsu
     reg LW = 1'b0, LW_delayed = 1'b0;                   // LW signal for lsu
+    reg[3:0] lsu_dstE,lsu_dstE_delayed;         // reg Address for lsu
     wire [3:0] lsu_dstM;       // reg Address from lsu
     wire [31:0] lsu_valM;       // reg data from lsu
     wire LW_DONE;              // data from lsu is ready
     assign addr_lsu = wEn ? addr : pc[7:0];  //MUX for addr_lsu
-    assign wdata_lsu = SW? valA : wDat;      //MUX for wdata_lsu
-   
+    
    /*regfile*/
     reg[3:0] dstE = 4'b0, dstM = 4'b0;      //dstE = ra(ADD,SUB...), dstM = rb(IRMOV)
     reg[31:0] valM = 32'h0;           //data to be written to regfile(no alu)
     reg[3:0] rA = 4'b0, rB = 4'b0;      //srcA and srcB-->rA,rB;
     wire[31:0] valA, valB;    //output of regfile
     reg[3:0] dstE_delayed;    //delayed dstE for matching time sequence
-    
+    assign wdata_lsu = SW? valA : wDat;      //MUX for wdata_lsu
     /*ALU*/
     reg[3:0] alufun;          //ALU功能码
     reg[3:0] alufun_delayed;  //用于将ALU功能码延后一个周期，以匹配时序
@@ -55,7 +55,7 @@ module processor(
     //instance for lsu
     lsu inst_lsu(
         .clock(clock),
-        .reset(working),
+        .reset(1'b0),
         .addr(addr_lsu),
         .wr(wEn),
         .wdata(wdata_lsu),
@@ -64,7 +64,7 @@ module processor(
         .SW(SW),
         .LW(LW),
         .valE(valE),      //%rB + valC
-        .dstE(dstE),      //rA
+        .dstE(lsu_dstE),      //rA
         .valM(lsu_valM),      //data to be written to regfile
         .dstM(lsu_dstM),       //rA
         .LW_DONE(LW_DONE) //data is ready
@@ -72,7 +72,7 @@ module processor(
     
     //instance for regfile
     regfile inst_regfile(  //第三个上升沿得到输出
-        .dstE(dstE),
+        .dstE(LW?lsu_dstE:dstE),
         .valE(valE),
         .dstM(LW_DONE?lsu_dstM:dstM),        
         .valM(LW_DONE?lsu_valM:valM),
@@ -108,6 +108,7 @@ module processor(
                 valM <= instr[15:0];       //valC
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0010 && instr[27:24] == 4'b0000) begin   //ADD,%rA ->valA, %rB -> valB
                 rA <= instr[23:20];      //rA
@@ -116,6 +117,7 @@ module processor(
                 dstE_delayed <= instr[23:20];  //rA,用于写回
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0010 && instr[27:24] == 4'b0001) begin   //SUB,%rA ->valA, %rB -> valB
                 rA <= instr[23:20];      //rA
@@ -124,6 +126,7 @@ module processor(
                 dstE_delayed <= instr[23:20];  //rA,用于写回
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0011 && instr[27:24] == 4'b0010) begin   //AND,%rA ->valA, %rB -> valB
                 rA <= instr[23:20];      //rA
@@ -132,6 +135,7 @@ module processor(
                 dstE_delayed <= instr[23:20];  //rA,用于写回
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0011 && instr[27:24] == 4'b0011) begin   //XOR,%rA ->valA, %rB -> valB
                 rA <= instr[23:20];      //rA
@@ -140,15 +144,19 @@ module processor(
                 dstE_delayed <= instr[23:20];  //rA,用于写回
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0100 && instr[27:24] == 4'b0000)begin   //LW
                 rA <= instr[23:20];      //rA
                 rB <= instr[19:16];      //rB
                 valC_delayed <= instr[15:0];  //valC
                 alufun_delayed <= 4'b0000;  //ADD
-                dstE_delayed <= instr[23:20];  //rA,用于写回和lsu保存
+                lsu_dstE_delayed <= instr[23:20];  //rA,用于写回和lsu保存
+                dstE_delayed <= 4'b1111;  //dstE悬空，以免干扰alu写入寄存器
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b1;
+                dstM <= 4'b1111;  //把dsM悬空，以免干扰lsu写入寄存器
+                pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0100 && instr[27:24] == 4'b0001)begin   //SW
                 rA <= instr[23:20];      //rA
@@ -158,20 +166,17 @@ module processor(
                 //SW does't need to write back
                 SW_delayed <= 1'b1;
                 LW_delayed <= 1'b0;
+                pc <= pc + 1;   //更新PC
             end
-            else begin
-                rA <= 4'b0;
-                rB <= 4'b0;
-                alufun_delayed <= 4'b0;
-                dstE_delayed <= 4'b0;
-                SW_delayed <= 1'b0;
-                LW_delayed <= 1'b0;
-            end
-            pc <= pc + 1;   //更新PC
+            
         end
         else if (working && (LW | SW)) begin  //LW/SW执行阶段,不解析,但是将LW和SW,等结束后取指
-            SW_delayed<= 1'b0;
-            LW_delayed<= 1'b0;
+            if (LW) begin
+                LW_delayed <= 1'b0;
+            end
+            if (SW) begin
+                SW_delayed <= 1'b0;
+            end
         end
     end
 
@@ -181,6 +186,7 @@ module processor(
         SW <= SW_delayed;          //将SW保存1个周期，用于alu&lsu
         LW <= LW_delayed;          //将LW保存1个周期，用于alu&lsu
         valC <= valC_delayed;      //将valC保存1个周期，用于alu
+        lsu_dstE <= lsu_dstE_delayed;  //将lsu_dstE保存1个周期，用于lsu写入寄存器
     end
 
 endmodule
