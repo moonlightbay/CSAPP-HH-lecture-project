@@ -10,7 +10,7 @@ input wire rEn, // Read enable
 output reg[31:0] rDat = 0 // Read data = line:arch:synchram:rDatB
 );
 
-reg[31:0] mem[512-1:0]; // Actual storage
+reg[31:0] mem[512-1:0] = 32'b0; // Actual storage
 
 always@(posedge clock)begin
     if(wEn)begin
