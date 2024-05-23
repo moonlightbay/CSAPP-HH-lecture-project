@@ -19,7 +19,6 @@ input [3 : 0] dstE, //reg address, dstE -> dstM
 output wire[31 : 0] valM, //read value of data
 output wire[3 : 0] dstM,//reg address
 output reg LW_DONE //LW_DONE is used to notify the processor that the data is ready
-//you can add other necessary signals freely...
 );
 
 /* signals for ram */

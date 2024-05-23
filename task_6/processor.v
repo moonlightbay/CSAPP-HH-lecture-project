@@ -155,7 +155,7 @@ module processor(
                 dstE_delayed <= 4'b1111;  //dstE悬空，以免干扰alu写入寄存器
                 SW_delayed <= 1'b0;
                 LW_delayed <= 1'b1;
-                dstM <= 4'b1111;  //把dsM悬空，以免干扰lsu写入寄存器
+                dstM <= 4'b1111;   //把dsM悬空，以免干扰lsu写入寄存器
                 pc <= pc + 1;   //更新PC
             end
             else if (instr[31:28] == 4'b0100 && instr[27:24] == 4'b0001)begin   //SW
