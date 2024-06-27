@@ -61,7 +61,7 @@ module processor(
     reg[31:0] last_valE;
     reg[31:0] last_valM;
     wire stall;
-    assign stall = (working && (instr[31:28] == 4'b0010 && 
+    assign stall = (working && (last_instr[31:24] == 8'b01000000 && 
                       ((instr[23:20] == last_rA)|  (instr[19:16] == last_rA))))? 1'b1 : 1'b0;
 
     lsu inst_lsu(
