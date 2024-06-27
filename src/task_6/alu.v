@@ -4,7 +4,7 @@
 
 module alu(
 input [31:0] aluA,
-input [31:0] aluB,  //在LW与SW中也作为基地址
+input [31:0] aluB,  
 input [3:0] alufun,
 output [31:0] valE
 );

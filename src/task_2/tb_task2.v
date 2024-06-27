@@ -39,13 +39,13 @@ module processor_tb;
         working = 0;
         wDat = 0;
         wEn = 1;
-        // Write first instruction (IRMOV $28, %r0) -> 10_00_00_1c
+        // Write first instruction (IRMOV $28, %r0) -> 10_f0_00_1c
         addr = 0; wDat = 32'h10f0001c;  #20;
-        // Write second instruction (IRMOV $29, %r1) -> 10_01_00_1d
+        // Write second instruction (IRMOV $29, %r1) -> 10_f1_00_1d
         addr = 1; wDat = 32'h10f1001d; #20;
-        // Write third instruction (IRMOV $30, %r2) -> 10_02_00_1e
+        // Write third instruction (IRMOV $30, %r2) -> 10_f2_00_1e
         addr = 2; wDat = 32'h10f2001e; #20;
-        // Write fourth instruction (IRMOV $31, %r3) -> 10_03_00_1f
+        // Write fourth instruction (IRMOV $31, %r3) -> 10_f3_00_1f
         addr = 3; wDat = 32'h10f3001f; #20;
 
         // stop writing
